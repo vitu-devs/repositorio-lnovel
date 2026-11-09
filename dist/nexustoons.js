@@ -117,7 +117,7 @@ var NexustoonsPlugin = /** @class */ (function () {
         this.id = 'nexustoons';
         this.name = 'Nexustoons (Novels)';
         this.site = 'https://nexustoons.com';
-        this.version = '1.0.0';
+        this.version = '1.0.1';
         this.icon = 'src/pt-br/nexustoons/icon.png';
         this.imageRequestInit = { headers: { Referer: this.site + '/' } };
     }
@@ -247,7 +247,7 @@ var NexustoonsPlugin = /** @class */ (function () {
     };
     NexustoonsPlugin.prototype.parseChapter = function (chapterPath) {
         return __awaiter(this, void 0, Promise, function () {
-            var match, chapter, $;
+            var match, chapter, $, inlineTags;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -279,6 +279,56 @@ var NexustoonsPlugin = /** @class */ (function () {
                                     $(element).removeAttr(attribute);
                                 }
                             }
+                        });
+                        inlineTags = [
+                            'b',
+                            'i',
+                            'span',
+                            'em',
+                            'br',
+                            'strong',
+                            'a',
+                            'mark',
+                            'small',
+                            'u',
+                            's',
+                            'sub',
+                            'sup',
+                        ];
+                        $('body, div, section, article, blockquote, li')
+                            .toArray()
+                            .reverse()
+                            .forEach(function (container) {
+                            var parts = [];
+                            var paragraph = '';
+                            var flush = function () {
+                                if ((0, cheerio_1.load)(paragraph).text().trim())
+                                    parts.push('<p>' + paragraph + '</p>');
+                                else if (paragraph.trim())
+                                    parts.push(paragraph);
+                                paragraph = '';
+                            };
+                            $(container)
+                                .contents()
+                                .each(function (_, node) {
+                                if (node.type === 'text') {
+                                    var pieces = $.html(node).split(/\r?\n\s*\r?\n/);
+                                    pieces.forEach(function (piece, index) {
+                                        if (index)
+                                            flush();
+                                        paragraph += piece;
+                                    });
+                                }
+                                else if ('tagName' in node && inlineTags.includes(node.tagName)) {
+                                    paragraph += $.html(node);
+                                }
+                                else {
+                                    flush();
+                                    parts.push($.html(node));
+                                }
+                            });
+                            flush();
+                            $(container).html(parts.join('\n'));
                         });
                         if (!$('body').text().trim())
                             throw new Error('O capítulo recebido está vazio.');

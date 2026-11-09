@@ -1,6 +1,6 @@
 {
   "name": "nexustoons-lnreader-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Fonte de novels da Nexustoons para LNReader",
   "scripts": {
@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "cheerio": "1.0.0",
+    "jsdom": "^26.1.0",
     "prettier": "3.6.2",
     "typescript": "5.9.3"
   }

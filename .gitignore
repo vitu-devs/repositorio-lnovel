@@ -1,8 +1,8 @@
 node_modules/
 upstream/
 .tools/
-*-client.js
-*-*.js
+/*-client.js
+/*-*.js
 nexus-*.json
 chapter-*.json
 decoded-*.json

@@ -94,7 +94,7 @@ class NexustoonsPlugin implements Plugin.PluginBase {
   id = 'nexustoons';
   name = 'Nexustoons (Novels)';
   site = 'https://nexustoons.com';
-  version = '1.0.0';
+  version = '1.0.1';
   icon = 'src/pt-br/nexustoons/icon.png';
   imageRequestInit = { headers: { Referer: this.site + '/' } };
 
@@ -245,6 +245,55 @@ class NexustoonsPlugin implements Plugin.PluginBase {
         }
       }
     });
+    // LNReader's TTS walks elements, not loose text nodes. Nexus sometimes
+    // separates raw text with <hr> instead of wrapping paragraphs in <p>.
+    // Group inline runs without flattening emphasis or existing block markup.
+    const inlineTags = [
+      'b',
+      'i',
+      'span',
+      'em',
+      'br',
+      'strong',
+      'a',
+      'mark',
+      'small',
+      'u',
+      's',
+      'sub',
+      'sup',
+    ];
+    $('body, div, section, article, blockquote, li')
+      .toArray()
+      .reverse()
+      .forEach(container => {
+        const parts: string[] = [];
+        let paragraph = '';
+        const flush = () => {
+          if (loadCheerio(paragraph).text().trim())
+            parts.push('<p>' + paragraph + '</p>');
+          else if (paragraph.trim()) parts.push(paragraph);
+          paragraph = '';
+        };
+        $(container)
+          .contents()
+          .each((_, node) => {
+            if (node.type === 'text') {
+              const pieces = $.html(node).split(/\r?\n\s*\r?\n/);
+              pieces.forEach((piece, index) => {
+                if (index) flush();
+                paragraph += piece;
+              });
+            } else if ('tagName' in node && inlineTags.includes(node.tagName)) {
+              paragraph += $.html(node);
+            } else {
+              flush();
+              parts.push($.html(node));
+            }
+          });
+        flush();
+        $(container).html(parts.join('\n'));
+      });
     if (!$('body').text().trim())
       throw new Error('O capítulo recebido está vazio.');
     return $('body').html() || '';

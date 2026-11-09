@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const loadPlugin = require('./load-plugin.cjs');
+const ttsCheck = require('./tts-check.cjs');
 const plugin = loadPlugin((url, init) =>
   fetch(url, { ...init, signal: AbortSignal.timeout(30000) }),
 );
@@ -46,9 +47,16 @@ const plugin = loadPlugin((url, init) =>
     const html = await plugin.parseChapter(chapter.path);
     assert(html.length > 200);
     assert(!/<script|<iframe|\bonclick=/i.test(html));
+    const tts = ttsCheck(html);
+    assert.equal(
+      tts.spokenText,
+      tts.fullText,
+      'TTS must read the entire chapter in order',
+    );
     report.checks.push({
       name: 'Shadow Slave chapter ' + number,
       characters: html.length,
+      spokenParagraphs: tts.paragraphs,
     });
   }
   fs.writeFileSync('test-report.json', JSON.stringify(report, null, 2));

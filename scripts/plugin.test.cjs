@@ -2,6 +2,38 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const loadPlugin = require('./load-plugin.cjs');
+const ttsCheck = require('./tts-check.cjs');
+
+test('LNReader 2.1.4 reads loose Nexus text between separators in order', async () => {
+  const input =
+    '<h2><b>Título</b></h2>Primeiro trecho.<hr/>Segundo <em>trecho</em>.<hr/>Fim.';
+  const before = ttsCheck(input);
+  assert.notEqual(before.fullText, before.spokenText);
+  const plugin = loadPlugin(async () =>
+    response({ contentType: 'text', textContent: input }),
+  );
+  const after = ttsCheck(await plugin.parseChapter('/ler/test/1'));
+  assert.equal(after.paragraphs, 4);
+  assert.equal(after.spokenText, before.fullText);
+});
+
+test('plain text and nested containers preserve all text without duplicate speech', async () => {
+  for (const input of [
+    'Ação &amp; reação.\n\nSegundo trecho.\n\nFim.',
+    '<div>Início.<hr/><section>Meio <strong>importante</strong>.\n\nOutro trecho.</section>Fim.</div>',
+    '<p>Primeiro <em>trecho</em>.</p><p>Segundo <a href="#nota">trecho</a>.</p>',
+  ]) {
+    const before = ttsCheck(input);
+    const plugin = loadPlugin(async () =>
+      response({ contentType: 'text', textContent: input }),
+    );
+    const html = await plugin.parseChapter('/ler/test/1');
+    const after = ttsCheck(html);
+    assert.equal(after.fullText, before.fullText);
+    assert.equal(after.spokenText, before.fullText);
+    assert(!html.includes('<p><p>'));
+  }
+});
 const response = data => ({ ok: true, status: 200, json: async () => data });
 test('empty searches and pages accept the API null-list response', async () => {
   const plugin = loadPlugin(async () =>

@@ -37,3 +37,13 @@ npm run format:check
 O código-fonte está em `plugins/portuguese/nexustoons.ts`. O build gera `dist/nexustoons.js` em CommonJS/ES5 e `plugins.min.json`. Mantenha ambos publicados na branch `main`. Atualizações precisam incrementar a versão do plugin e do manifesto.
 
 A implementação segue o contrato do [LNReader Plugins](https://github.com/LNReader/lnreader-plugins). O ícone pertence à Nexustoons. Este repositório não hospeda capítulos ou livros.
+
+## Atualização 1.0.1 — leitura em voz alta
+
+Corrige capítulos enviados pela Nexus como texto solto separado por `<hr>`. O leitor de voz do LNReader 2.1.4 percorre elementos HTML e ignorava esses trechos. Agora o plugin envolve o texto em parágrafos, preservando a ordem e a formatação existente.
+
+O teste usa o trecho original do leitor TTS da versão 2.1.4 (licença em `scripts/fixtures/LNREADER-LICENSE`). Além dos testes sintéticos, a leitura integral e ordenada dos capítulos 0, 1 e 2 de Shadow Slave foi verificada no site. Isso valida a fila de texto, não o áudio produzido por um aparelho Android.
+
+No LNReader, atualize **Nexustoons (Novels)** para **1.0.1**, feche e reabra o aplicativo. Para capítulos baixados anteriormente, remova somente o download do capítulo e baixe novamente: o HTML antigo não é alterado pela atualização do plugin. Preserve a obra na biblioteca e os dados do aplicativo.
+
+A voz é escolhida no LNReader em **configurações do leitor → TTS → Engine / Voice**. Ela depende dos motores instalados no Android; o plugin não instala nem substitui vozes. No Galaxy, procure **Texto para voz** nas configurações, selecione um motor e instale os dados de voz em português do Brasil. Depois escolha o mesmo motor e uma voz `pt-BR` no LNReader. Compare as vozes disponíveis; uma voz neural externa exige um motor compatível ou uma integração adicional, não apenas esta extensão.

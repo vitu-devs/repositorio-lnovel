@@ -32,7 +32,9 @@ const manifest = [
     name: 'Nexustoons (Novels)',
     site: 'https://nexustoons.com',
     lang: 'Português',
-    version: '1.0.0',
+    version: JSON.parse(
+      fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+    ).version,
     url: base + '/dist/nexustoons.js',
     iconUrl: base + '/public/static/src/pt-br/nexustoons/icon.png',
   },
