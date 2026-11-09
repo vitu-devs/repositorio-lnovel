@@ -1,0 +1,17 @@
+{
+  "name": "nexustoons-lnreader-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fonte de novels da Nexustoons para LNReader",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "node --test scripts/plugin.test.cjs",
+    "test:live": "node scripts/live-test.cjs",
+    "format:check": "prettier --check plugins/portuguese/nexustoons.ts scripts/*.cjs"
+  },
+  "devDependencies": {
+    "cheerio": "1.0.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  }
+}
